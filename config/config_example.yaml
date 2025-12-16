@@ -1,0 +1,11 @@
+log_level: info
+service_name: migrator
+mssql:
+  dsn: "sqlserver://user:pass@host:1433?database=db"
+  max_conns: 10
+  rate_limit: 50
+  cdc_enabled: true
+clickhouse:
+  dsn: "clickhouse://user:pass@host:8123/db"
+  max_conns: 10
+
