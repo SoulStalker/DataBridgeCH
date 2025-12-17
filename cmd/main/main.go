@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/SoulStalker/data_bridge_ch/internal/config"
-	"github.com/SoulStalker/data_bridge_ch/internal/migrator/repo"
+	repo "github.com/SoulStalker/data_bridge_ch/internal/mssql"
 )
 
 func main() {
