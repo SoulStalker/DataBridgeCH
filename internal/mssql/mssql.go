@@ -1,4 +1,4 @@
-package repo
+package mssql
 
 import (
 	"context"

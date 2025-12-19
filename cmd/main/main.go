@@ -6,9 +6,10 @@ import (
 	"log"
 	"slices"
 
+	"github.com/SoulStalker/data_bridge_ch/internal/clickhouse"
 	"github.com/SoulStalker/data_bridge_ch/internal/config"
 	"github.com/SoulStalker/data_bridge_ch/internal/model"
-	repo "github.com/SoulStalker/data_bridge_ch/internal/mssql"
+	"github.com/SoulStalker/data_bridge_ch/internal/mssql"
 	"github.com/google/uuid"
 )
 
@@ -16,7 +17,7 @@ func main() {
 	ROWS_1C := []string{"_InfoRg5404", "_InfoRg5415", "_InfoRg4432", "_InfoRg6453", "_AccumRg10970", "_AccumRg5628"}
 
 	cfg := config.MustLoad("./config/config.yaml")
-	db, err := repo.NewMSSQLRepo(cfg.MSSQL)
+	db, err := mssql.NewMSSQLRepo(cfg.MSSQL)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -45,6 +46,10 @@ func main() {
 		}
 	}
 
+	err = clickhouse.InitDB(cfg.ClickHouse)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
 
 // TODO: move this func
