@@ -9,6 +9,7 @@ import (
 	_ "github.com/microsoft/go-mssqldb"
 
 	"github.com/SoulStalker/data_bridge_ch/internal/config"
+	"github.com/SoulStalker/data_bridge_ch/internal/model"
 	"golang.org/x/time/rate"
 )
 
@@ -76,4 +77,54 @@ func (r *MSSQLRepo) Tables(ctx context.Context) ([]TableInfo, error) {
 	}
 
 	return result, err
+}
+
+func (r *MSSQLRepo) FetchProducts(ctx context.Context, batchSize int, out chan<- []model.Reference379) error {
+	offset := 0
+	const query = `
+			SELECT 
+			    _IDRRef, _Version, _Marked, _PredefinedID, _ParentIDRRef, _Folder, _Code, _Description
+			FROM dbo._Reference379
+			ORDER BY _IDRRef
+			OFFSET @p1 ROWS FETCH NEXT @p2 ROWS ONLY`
+
+	for {
+		rows, err := r.db.QueryContext(ctx, query,
+			sql.Named("p1", offset),
+			sql.Named("p2", batchSize),
+		)
+		if err != nil {
+			return err
+		}
+
+		batch := make([]model.Reference379, 0, batchSize)
+		for rows.Next() {
+			var r model.Reference379
+			if err := rows.Scan(
+				&r.ID,
+				&r.Version,
+				&r.Marked,
+				&r.PredefinedID,
+				&r.ParentID,
+				&r.Folder,
+				&r.Code,
+				&r.Description,
+			); err != nil {
+				rows.Close()
+				return err
+			}
+			batch = append(batch, r)
+		}
+		rows.Close()
+
+		if len(batch) == 0 {
+			break
+		}
+
+		out <- batch
+		offset += len(batch)
+	}
+
+	close(out)
+	return nil
 }
